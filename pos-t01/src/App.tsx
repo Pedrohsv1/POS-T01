@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
-import $ from 'jquery';
-import 'bootstrap/dist/js/bootstrap.bundle';
+
+interface Todo {
+  id: number;
+  title: string;
+  check: boolean;
+}
 
 const ToDoItem = (props: any) => {
+
   return(
     <div className="todo-item">
           <div className="checker">
-            <span><input type="checkbox" /></span>
+            <span><input type="checkbox" onClick={props.handle} /></span>
          </div>
         <span>{props.title}</span>
-      <a href="javascript:void(0);" className="float-right remove-todo-item"><i className="icon-close" /></a>
+      <a href="" className="float-right remove-todo-item"><i className="icon-close" /></a>
   </div>
   )
 }
@@ -19,64 +24,56 @@ const MenuItem = (props: any) => {
   return (
     <>
       <li role="presentation" className="nav-item all-task active">
-        <a href="#" className="nav-link">{props.title}</a>
+        <div onClick={props.handleFilter} className="nav-link">{props.title}</div>
       </li>
     </>
 
   )
 }
 
+
 export const App: React.FC = () => {
-  React.useEffect(() => {
-    const todo = () => {
-      $(".todo-list .todo-item input").click(function () {
-        if ($(this).is(":checked")) {
-          $(this).parent().parent().parent().toggleClass("complete");
-        } else {
-          $(this).parent().parent().parent().toggleClass("complete");
-        }
-      });
+  const [toDo, setToDo] = useState<Todo[]>([{id: 1, title: 'New One', check: false}]);
+  const [ toDoM, setToDoM ] =  useState<Todo[]>(toDo)
 
-      $(".todo-nav .all-task").click(function () {
-        $(".todo-list").removeClass("only-active");
-        $(".todo-list").removeClass("only-complete");
-        $(".todo-nav li.active").removeClass("active");
-        $(this).addClass("active");
-      });
+  const updateByIndex = (index : number) => {
+    const newArray = [...toDo]
+    console.log(newArray)
+    newArray[index].check = true;
+    setToDo(newArray)
+  };
+  
 
-      $(".todo-nav .active-task").click(function () {
-        $(".todo-list").removeClass("only-complete");
-        $(".todo-list").addClass("only-active");
-        $(".todo-nav li.active").removeClass("active");
-        $(this).addClass("active");
-      });
 
-      $(".todo-nav .completed-task").click(function () {
-        $(".todo-list").removeClass("only-active");
-        $(".todo-list").addClass("only-complete");
-        $(".todo-nav li.active").removeClass("active");
-        $(this).addClass("active");
-      });
+    
+  const filterByActive = () => {
+    const filterActive = toDo.filter((Todo) => Todo.check === true)
+    setToDoM(filterActive);
+    console.log('Opa')
+    
+  }
 
-      $("#uniform-all-complete input").click(function () {
-        if ($(this).is(":checked")) {
-          $(".todo-item .checker span:not(.checked) input").click();
-        } else {
-          $(".todo-item .checker span.checked input").click();
-        }
-      });
+  const filterByCompleted = () => {
+    const filterCompleted = toDo.filter((Todo) => Todo.check === false)
+    setToDoM(filterCompleted);
+  }
 
-      $(".remove-todo-item").click(function () {
-        $(this).parent().remove();
-      });
-    };
-
-    todo();
-  }, []);
+  const filterAll = () => {
+    setToDoM(toDo);
+  }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.length > 0) {
-      $('<div class="todo-item"><div class="checker"><span class=""><input type="checkbox"></span></div> <span>' + e.currentTarget.value + '</span> <a href="javascript:void(0);" class="float-right remove-todo-item"><i class="icon-close"></i></a></div>').insertAfter('.todo-list .todo-item:last-child');
+      console.log(e.currentTarget.value)
+      const Do = { id: toDo.length + 1, title: e.currentTarget.value, check: false }
+      setToDo(prevLista => [
+        ...prevLista,
+        Do
+      ]);
+      setToDoM(prevLista => [
+        ...prevLista,
+        Do
+      ]);
       e.currentTarget.value = "";
     } else if (e.key === 'Enter') {
       alert("Please enter a new task");
@@ -90,7 +87,7 @@ export const App: React.FC = () => {
           <div className="col-md-12">
             <div className="card card-white">
               <div className="card-body">
-                <form action="javascript:void(0);">
+                <form>
                   <input
                     type="text"
                     className="form-control add-task"
@@ -99,13 +96,17 @@ export const App: React.FC = () => {
                   />
                 </form>
                 <ul className="nav nav-pills todo-nav">
-                  <MenuItem title="All" />
-                  <MenuItem title="Active" />
-                  <MenuItem title="Completed" />
+                  <MenuItem title="All" handleFilter={filterAll} />
+                  <MenuItem title="Active" handleFilter={filterByCompleted}/>
+                  <MenuItem title="Completed" handleFilter={filterByActive}/>
                 </ul>
                 <div className="todo-list">
-                  <ToDoItem title="Create Theme"/>
-                  <ToDoItem title="Create Theme"/>
+                  {toDoM.map((Do) => {
+                    return (
+                      <ToDoItem key={Do.id} title={Do.title} handle={updateByIndex}/>
+                    )
+                  })
+                  }
               </div>
             </div>
           </div>

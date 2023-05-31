@@ -1,5 +1,15 @@
+.container {
+  margin-top: 2em;
+}
+
 .todo-nav {
   margin-top: 10px;
+}
+
+.todo-item{
+  display: flex;
+  align-items: center;
+  gap: 1em;
 }
 
 .todo-list {
