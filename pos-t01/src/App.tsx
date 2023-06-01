@@ -75,8 +75,10 @@ export const App: React.FC = () => {
         Do
       ]);
       e.currentTarget.value = "";
+      e.preventDefault();
     } else if (e.key === 'Enter') {
       alert("Please enter a new task");
+      e.preventDefault();
     }
   };
 
